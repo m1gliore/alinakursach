@@ -8,7 +8,7 @@ import {
     TableCell,
     TableContainer,
     TableRow,
-    Paper,
+    Paper
 } from '@mui/material';
 import {BarChart, PieChart, ShowChart} from '@mui/icons-material';
 import {Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie} from 'recharts';

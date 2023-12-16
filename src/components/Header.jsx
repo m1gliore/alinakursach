@@ -11,7 +11,7 @@ import {
 import {Badge, Option, Select, selectClasses} from "@mui/joy";
 import {useRouter} from "next/router";
 import {useSelector} from "react-redux";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import {useForm} from "react-hook-form";
 import * as ModalForm from "./ModalForm";
 import ModalWindow from "./ModalWindow";
@@ -104,10 +104,32 @@ const Header = ({handleCurrencyChange}) => {
         (async () => {
             await axios.get(`http://localhost:8080/api/products/basket/${user.idUser}/products`)
                 .then(res => setQuantity(res.data.length))
-            await axios.get(`http://localhost:8080/api/notifications/notifications/user/${user.idUser}`)
-                .then(res => setNotifications(res.data))
         })()
     }, [])
+
+    const checkForUpdates = useCallback(async () => {
+        await axios.get(`http://localhost:8080/api/notifications/notifications/user/${user.idUser}`)
+            .then(res => {
+                if (res.status !== 200) {
+                    throw new Error('Network response was not ok')
+                }
+                return res
+            })
+            .then(res => {
+                setNotifications(res.data)
+                setTimeout(checkForUpdates, 2000)
+            })
+            .catch(err => {
+                alert(`There was a problem with the fetch operation: ${err}`)
+                setTimeout(checkForUpdates, 2000)
+            })
+    }, [user])
+
+    useEffect(() => {
+        if (user !== "") {
+            checkForUpdates()
+        }
+    }, [user, checkForUpdates])
 
     const reloadPage = () => {
         router.reload()
@@ -128,6 +150,10 @@ const Header = ({handleCurrencyChange}) => {
 
     const handleChange = (event, newValue) => {
         handleCurrencyChange(newValue)
+    }
+
+    const deleteNotification = async (id) => {
+        axios.delete(`http://localhost:8080/api/notifications/notifications/${id}`)
     }
 
     const handleLogin = (data) => {
@@ -231,7 +257,7 @@ const Header = ({handleCurrencyChange}) => {
                         >
                             <List>
                                 {notifications.map((notification, index) => (
-                                    <ListItem key={index}>
+                                    <ListItem onClick={() => deleteNotification(notification.idNotification)} key={index}>
                                         <ListItemText primary={notification.message}/>
                                     </ListItem>
                                 ))}
