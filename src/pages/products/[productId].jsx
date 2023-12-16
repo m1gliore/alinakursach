@@ -28,7 +28,7 @@ const GamePage = () => {
     const {register, handleSubmit} = useForm()
     const [imageUrl, setImageUrl] = useState("/images/defaultGame.png")
     const [file, setFile] = useState(null)
-    const [DLCs, setDLCs] = useState([])
+    const [recs, setRecs] = useState([])
     const [user,] = useLocalStorage("user")
     const [isAdmin, setIsAdmin] = useState(false)
 
@@ -47,8 +47,8 @@ const GamePage = () => {
         (async () => {
             productId && await axios.get(`http://localhost:8080/api/products/getProduct/${productId}`)
                 .then(res => setProduct(res.data))
-            // productId && await axios.get(`http://localhost:8080/api/products/recommendations/userstat/${productId}/${user.idUser}`)
-            //     .then(res => console.log(res.data))
+            productId && !isAdmin && await axios.get(`http://localhost:8080/api/products/recommendations/userstat/${productId}/${user.idUser}`)
+                .then(res => setRecs(res.data.slice(0, 6)))
             productId && await axios.get(`http://localhost:8080/api/record/records/product/${productId}`)
                 .then(res => setReviews(res.data.content))
         })()
@@ -150,11 +150,11 @@ const GamePage = () => {
                 <StyledGamePage.DLCContainer>
                     <StyledGamePage.DLCHeading>Похожие продукты:</StyledGamePage.DLCHeading>
                     <StyledGamePage.DLCItems>
-                        {DLCs.map((dlc) => (
-                            <StyledGamePage.DLCItem key={dlc.id} onClick={() => router.push(`/products/${dlc.id}`)}>
-                                <StyledGamePage.DLCImage src={dlc.image} alt={dlc.name}/>
-                                <StyledGamePage.DLCName>{dlc.name}</StyledGamePage.DLCName>
-                                <StyledGamePage.DLCPrice>{convertCurrency(currency, dlc.price)}</StyledGamePage.DLCPrice>
+                        {recs.map((rec, index) => (
+                            <StyledGamePage.DLCItem key={index} onClick={() => router.push(`/products/${rec?.idProduct}`)}>
+                                <StyledGamePage.DLCImage src={"data:" + rec?.images[0].type + ";base64," + rec?.images[0].file_image} alt={rec?.nameProduct}/>
+                                <StyledGamePage.DLCName>{rec?.nameProduct}</StyledGamePage.DLCName>
+                                <StyledGamePage.DLCPrice>{convertCurrency(currency, rec?.priceProduct)}</StyledGamePage.DLCPrice>
                             </StyledGamePage.DLCItem>
                         ))}
                     </StyledGamePage.DLCItems>

@@ -37,12 +37,13 @@ const CartPage = () => {
     const price = calculateTotal(cartItems)
     const total = (convertToNumber(convertCurrency(currency, price)))
 
-    const handlePayment = () => {
-
+    const handlePayment = async () => {
+        await axios.put(`http://localhost:8080/api/users/basket/removeAll/${user.idUser}`, {})
+            .then(() => reloadPage())
     }
 
     const handleRemove = async (id) => {
-        await axios.delete(`http://localhost:8080/api/users/basket/remove/${user.idUser}/product/${id}`)
+        await axios.put(`http://localhost:8080/api/users/basket/remove/${user.idUser}/product/${id}`, {})
             .then(() => reloadPage())
     }
 
